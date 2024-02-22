@@ -1,0 +1,5 @@
+Production Release <%= ENV['VERSION'] %>
+
+<% pull_requests.filter{ |pr| !pr.mention.include?("[bot]") }.each do |pr| %>
+- #<%=  pr.pr.number %> <%= pr.mention %>
+<% end %>
