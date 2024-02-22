@@ -1,0 +1,44 @@
+name: Create Staging Pull Request
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - closed
+
+jobs:
+  git-staging-pr:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: List closed staging release
+        id: closed-staging-release
+        run: |
+          echo "length=$(gh pr list -L 1000 -S "is:pr is:closed Staging Release" | wc -l)" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Create a release pull request
+        env:
+          GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: staging
+          GIT_PR_RELEASE_BRANCH_STAGING: develop
+          GIT_PR_RELEASE_LABELS: Release
+          GIT_PR_RELEASE_TEMPLATE: .github/pr-templates/.git-staging-template.erb
+          CLOSED_STAGING_RELEASE_LENGTH: ${{ steps.closed-staging-release.outputs.length }}
+        run: |
+          gem install -N git-pr-release
+          git-pr-release

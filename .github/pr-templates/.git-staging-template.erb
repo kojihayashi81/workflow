@@ -1,0 +1,5 @@
+Staging Release <%= ENV['CLOSED_STAGING_RELEASE_LENGTH'].to_i + 1 %>
+
+<% pull_requests.filter{ |pr| !pr.mention.include?("[bot]") }.each do |pr| %>
+- #<%=  pr.pr.number %> <%= pr.mention %>
+<% end %>
