@@ -1,0 +1,23 @@
+name: Delete Merged Main Branches
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - closed
+
+jobs:
+  delete:
+    if:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete Branches
+        run: |
+          git branch -r --merged=develop | grep -vE '^\s*origin/(main|staging|develop|HEAD)$' | sed 's/origin\///' | xargs git push --delete origin
